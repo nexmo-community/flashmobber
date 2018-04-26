@@ -37,6 +37,13 @@ class IncomingSMS:
     concat_ref = attr.ib(type=str, default=None)
     concat_total = attr.ib(type=int, default=None)
 
+    def to_model(self):
+        data = {a.name: getattr(self, a.name) for a in attr.fields(self.__class__)}
+        del data['concat']
+        return SMSMessagePart(
+            **data
+        )
+
 
 class Timestamp(fields.Field):
     def _deserialize(self, value, attr, data):
