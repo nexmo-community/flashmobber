@@ -1,3 +1,3 @@
 from flashmobber.settings import *
 
-print(INSTALLED_APPS)
+NEXMO_SIGNATURE_SECRET = 'abcdefABCDEF12345'

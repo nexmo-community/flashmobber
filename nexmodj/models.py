@@ -8,14 +8,15 @@ class SMSMessagePart(models.Model):
     msisdn = models.CharField(max_length=24)
     to = models.CharField(max_length=24)
 
-    text = models.CharField(max_length=160)
+    text = models.CharField(max_length=160, null=True)
     # TODO: Need to do something with these:
-    data = models.BinaryField(max_length=160)
-    udh = models.BinaryField(max_length=160)
+    data = models.BinaryField(max_length=160, null=True)
+    udh = models.BinaryField(max_length=160, null=True)
 
     type = models.CharField(
-        max_length=7, choices=[('text', 'Text'), ('unicode', 'Unicode'), ('binary', 'Binary')])
-    keyword = models.CharField(max_length=160)
+        max_length=7,
+        choices=[('text', 'Text'), ('unicode', 'Unicode'), ('binary', 'Binary')])
+    keyword = models.CharField(max_length=160, null=True)
     message_timestamp = models.DateTimeField()
     timestamp = models.DateTimeField()
 

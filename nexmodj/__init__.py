@@ -2,6 +2,7 @@ from django.conf import settings
 
 import nexmo
 
+
 client = nexmo.Client(
     api_key=getattr(settings, 'NEXMO_API_KEY', None),
     api_secret=getattr(settings, 'NEXMO_API_SECRET', None),

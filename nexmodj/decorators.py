@@ -1,5 +1,5 @@
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, timezone
 from functools import wraps
 import json
 
@@ -71,8 +71,14 @@ class IncomingSMSSchema(Schema):
 
     @post_load
     def make_sms(self, data):
-        print(data)
+        for key in ['message_timestamp', 'timestamp']:
+            d = data[key]
+            if d.tzinfo is None:
+                data[key] = d.astimezone(timezone.utc)
         return IncomingSMS(**data)
+
+
+incoming_sms_parser = IncomingSMSSchema()
 
 
 def sms_webhook(func):
@@ -87,12 +93,14 @@ def sms_webhook(func):
             if client.check_signature(data):
                 if data.get('concat') == 'true':
                     # Put it in the database.
+                    incoming_sms_parser.load(data).to_model().save()
                     # Then query if we have all the parts
                     # and run func if necessary.
-                    pass
+                    return HttpResponse("Partial message received.")
                 else:
                     return func(request, *args, *kwargs)
-            return HttpResponse("Invalid signature.", status=403, reason="Invalid signature.")
+            else:
+                return HttpResponse("Invalid signature.", status=403, reason="Invalid signature.")
         except json.JSONDecodeError:
             return HttpResponse("Invalid JSON payload provided.", status=400)
     return inner
