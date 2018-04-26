@@ -4,6 +4,8 @@ from functools import wraps
 import json
 
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 import attr
 from marshmallow import Schema, fields, post_load
@@ -68,10 +70,10 @@ class IncomingSMSSchema(Schema):
 
 def sms_webhook(func):
     @wraps(func)
+    @csrf_exempt
+    @require_POST
     def inner(request, *args, **kwargs):
         try:
-            if request.method != 'POST':
-                return HttpResponse("Method not allowed: {}".format(request.method), status=405)
             if request.content_type != 'application/json':
                 return HttpResponse("Unsupported request content-type.", status=415)
             data = json.loads(request.body.decode('utf-8'))
