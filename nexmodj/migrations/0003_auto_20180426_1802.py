@@ -5,18 +5,15 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('nexmodj', '0002_auto_20180426_1521'),
-    ]
+    dependencies = [("nexmodj", "0002_auto_20180426_1521")]
 
     operations = [
         migrations.AlterField(
-            model_name='smsmessagepart',
-            name='message_id',
+            model_name="smsmessagepart",
+            name="message_id",
             field=models.CharField(max_length=32, unique=True),
         ),
         migrations.AlterUniqueTogether(
-            name='smsmessagepart',
-            unique_together={('concat_ref', 'concat_part')},
+            name="smsmessagepart", unique_together={("concat_ref", "concat_part")}
         ),
     ]

@@ -5,29 +5,27 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('nexmodj', '0001_initial'),
-    ]
+    dependencies = [("nexmodj", "0001_initial")]
 
     operations = [
         migrations.AlterField(
-            model_name='smsmessagepart',
-            name='data',
+            model_name="smsmessagepart",
+            name="data",
             field=models.BinaryField(max_length=160, null=True),
         ),
         migrations.AlterField(
-            model_name='smsmessagepart',
-            name='keyword',
+            model_name="smsmessagepart",
+            name="keyword",
             field=models.CharField(max_length=160, null=True),
         ),
         migrations.AlterField(
-            model_name='smsmessagepart',
-            name='text',
+            model_name="smsmessagepart",
+            name="text",
             field=models.CharField(max_length=160, null=True),
         ),
         migrations.AlterField(
-            model_name='smsmessagepart',
-            name='udh',
+            model_name="smsmessagepart",
+            name="udh",
             field=models.BinaryField(max_length=160, null=True),
         ),
     ]

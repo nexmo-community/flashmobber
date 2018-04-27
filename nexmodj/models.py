@@ -15,7 +15,8 @@ class SMSMessagePart(models.Model):
 
     type = models.CharField(
         max_length=7,
-        choices=[('text', 'Text'), ('unicode', 'Unicode'), ('binary', 'Binary')])
+        choices=[("text", "Text"), ("unicode", "Unicode"), ("binary", "Binary")],
+    )
     keyword = models.CharField(max_length=160, null=True)
     message_timestamp = models.DateTimeField()
     timestamp = models.DateTimeField()
@@ -25,5 +26,5 @@ class SMSMessagePart(models.Model):
     concat_total = models.IntegerField()
 
     class Meta:
-        ordering = ('-concat_ref', 'concat_part')
+        ordering = ("-concat_ref", "concat_part")
         unique_together = ("concat_ref", "concat_part")
