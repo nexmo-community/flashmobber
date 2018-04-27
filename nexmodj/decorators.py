@@ -1,8 +1,14 @@
+"""
+nexmodj.decorators - decorators that make it easier to work with Nexmo.
+
+
+"""
 from enum import Enum
 from datetime import datetime, timezone
 from functools import wraps
 import json
 
+from django.db import IntegrityError, transaction
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -17,6 +23,7 @@ from . import client
 
 @attr.s
 class IncomingSMS:
+    """ Object representing an incoming SMS message or part-message, parsed from JSON. """
     message_id = attr.ib(type=str)
     msisdn = attr.ib(type=str)
     to = attr.ib(type=str)
@@ -46,11 +53,13 @@ class IncomingSMS:
 
 
 class Timestamp(fields.Field):
+    """ Marshmallow Field to convert a UTC unix time into a UTC timezone-aware datetime. """
     def _deserialize(self, value, attr, data):
-        return datetime.fromtimestamp(int(value))
+        return datetime.fromtimestamp(int(value)).astimezone(timezone.utc)
 
 
 class IncomingSMSSchema(Schema):
+    """ Marshmallow schema to map from Nexmo incoming SMS JSON to an IncomingSMS instance. """
     msisdn = fields.Str()
     to = fields.Str()
     message_id = fields.Str(data_key='messageId')
@@ -71,36 +80,82 @@ class IncomingSMSSchema(Schema):
 
     @post_load
     def make_sms(self, data):
-        for key in ['message_timestamp', 'timestamp']:
-            d = data[key]
-            if d.tzinfo is None:
-                data[key] = d.astimezone(timezone.utc)
+        d = data['message_timestamp']
+        if d.tzinfo is None:
+            data['message_timestamp'] = d.astimezone(timezone.utc)
         return IncomingSMS(**data)
 
 
 incoming_sms_parser = IncomingSMSSchema()
 
+def sms_webhook(*, validate_signature=True):
+    """
+    A decorator for views which respond to incoming SMS messages.
 
-def sms_webhook(func):
-    @wraps(func)
-    @csrf_exempt
-    @require_POST
-    def inner(request, *args, **kwargs):
-        try:
-            if request.content_type != 'application/json':
-                return HttpResponse("Unsupported request content-type.", status=415)
-            data = json.loads(request.body.decode('utf-8'))
-            if client.check_signature(data):
-                if data.get('concat') == 'true':
-                    # Put it in the database.
-                    incoming_sms_parser.load(data).to_model().save()
-                    # Then query if we have all the parts
-                    # and run func if necessary.
-                    return HttpResponse("Partial message received.")
+    Example::
+
+        @sms_webhook()
+        def birthday_rsvp_view(request):
+            # Access the `IncomingSMS` object via `request.sms`
+            if request.sms.text.upper() == 'YES':
+                BirthdayResponses(sender_tel=request.sms.msisdn, attending=True).save()
+
+    Behind the scenes, a couple of things are done for you:
+
+    * The signature is verified against your signature secret, defined in
+      `settings.NEXMO_SIGNATURE_SECRET`.
+    * Messages sent as multiple parts are stored in the database until all
+      parts are available. The underlying view is only called once all parts
+      are available and have been merged into a single `IncomingSMS` instance.
+    """
+    def decorator(func):
+        @wraps(func)
+        @csrf_exempt
+        @require_POST
+        def inner(request, *args, **kwargs):
+            try:
+                if request.content_type != 'application/json':
+                    return HttpResponse("Unsupported request content-type.", status=415)
+                data = json.loads(request.body.decode('utf-8'))
+                if (not validate_signature) or client.check_signature(data):
+                    if data.get('concat') == 'true':
+                        # Put it in the database.
+                        try:
+                            with transaction.atomic():
+                                incoming_sms = incoming_sms_parser.load(data)
+                                incoming_sms.to_model().save()
+                        except IntegrityError:
+                            return HttpResponse("Partial message already stored.")
+
+                        # Then query if we have all the parts
+                        matching_parts = SMSMessagePart.objects.filter(concat_ref=incoming_sms.concat_ref)
+                        count = matching_parts.count()
+                        expected = incoming_sms.concat_total
+                        if count == expected:
+                            # If we have all the parts then create a FrankenSMS from the pieces,
+                            # and call the wrapped view function:
+                            text = ''.join(part.text for part in matching_parts)
+                            request.sms = IncomingSMS(
+                                msisdn=incoming_sms.msisdn,
+                                to=incoming_sms.to,
+                                message_id=incoming_sms.message_id,
+                                text=text,
+                                type=incoming_sms.type,
+                                keyword=incoming_sms.keyword,
+                                message_timestamp=incoming_sms.message_timestamp,
+                                timestamp=incoming_sms.timestamp,
+                                concat=False,
+                                concat_ref=incoming_sms.concat_ref,
+                            )
+                            return func(request, *args, **kwargs)
+                        else:
+                            return HttpResponse("Partial message received.")
+                    else:
+                        request.sms = incoming_sms_parser.load(data)
+                        return func(request, *args, **kwargs)
                 else:
-                    return func(request, *args, *kwargs)
-            else:
-                return HttpResponse("Invalid signature.", status=403, reason="Invalid signature.")
-        except json.JSONDecodeError:
-            return HttpResponse("Invalid JSON payload provided.", status=400)
-    return inner
+                    return HttpResponse("Invalid signature.", status=403, reason="Invalid signature.")
+            except json.JSONDecodeError:
+                return HttpResponse("Invalid JSON payload provided.", status=400)
+        return inner
+    return decorator

@@ -4,7 +4,7 @@ from django.db import models
 class SMSMessagePart(models.Model):
     concat_ref = models.CharField(max_length=32, db_index=True)
 
-    message_id = models.CharField(max_length=32)
+    message_id = models.CharField(max_length=32, unique=True)
     msisdn = models.CharField(max_length=24)
     to = models.CharField(max_length=24)
 
@@ -23,3 +23,7 @@ class SMSMessagePart(models.Model):
     concat_part = models.IntegerField()
     concat_ref = models.CharField(max_length=32)
     concat_total = models.IntegerField()
+
+    class Meta:
+        ordering = ('-concat_ref', 'concat_part')
+        unique_together = ("concat_ref", "concat_part")
