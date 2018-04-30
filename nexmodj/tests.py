@@ -10,6 +10,7 @@ import nexmodj as n
 import nexmodj.decorators as d
 import nexmodj.models as models
 
+from random import shuffle
 from unittest.mock import MagicMock, call, sentinel
 
 import pytest
@@ -246,3 +247,45 @@ def test_decorator_partial__bad_sig(rf, partial_message):
     assert (
         len(models.SMSMessagePart.objects.filter(concat_ref="78")) == 1
     ), "Part should be saved."
+
+
+@pytest.mark.django_db
+def test_decorator_multipart(rf):
+    parts = ["This", " is", " a ", "multipart", " message"]
+
+    view = MagicMock(return_value=sentinel.response)
+    webhook = d.sms_webhook(validate_signature=False)(view)
+    
+    requests = [
+        rf.post(
+            "/sms/incoming",
+            content_type="application/json",
+            data=json.dumps({
+                "concat": "true",
+                "concat-part": f"{index + 1}",
+                "concat-ref": "78",
+                "concat-total": f"{len(parts)}",
+                "keyword": "LOREM",
+                "message-timestamp": "2018-04-24 14:05:19",
+                "messageId": f"0B000000D0EBB58{index}",
+                "msisdn": "447700900419",
+                "text": part,
+                "timestamp": "1524578719",
+                "to": "447700900996",
+                "type": "unicode",
+            }),
+        )
+        for index, part in enumerate(parts)
+    ]
+    shuffle(requests)
+
+    for request in requests[:-1]:
+        response = webhook(request)
+        assert response.status_code == 200
+
+    response = webhook(requests[-1])
+    assert response is sentinel.response
+
+    assert len(view.mock_calls) == 1
+    name, args, kwargs = view.mock_calls[0]
+    assert args[0].sms.text == 'This is a multipart message'

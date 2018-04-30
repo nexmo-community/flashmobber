@@ -11,3 +11,5 @@ client = nexmo.Client(
     application_id=getattr(settings, "NEXMO_APPLICATION_ID", None),
     private_key=getattr(settings, "NEXMO_PRIVATE_KEY", None),
 )
+
+default_app_config = 'nexmodj.apps.NexmodjConfig'

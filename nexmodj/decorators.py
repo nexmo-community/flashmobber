@@ -90,7 +90,7 @@ class IncomingSMSSchema(Schema):
 incoming_sms_parser = IncomingSMSSchema()
 
 
-def sms_webhook(*, validate_signature=True):
+def sms_webhook(func=None, *, validate_signature=True):
     """
     A decorator for views which respond to incoming SMS messages.
 
@@ -113,7 +113,6 @@ def sms_webhook(*, validate_signature=True):
     """
 
     def decorator(func):
-
         @wraps(func)
         @csrf_exempt
         @require_POST
@@ -126,39 +125,7 @@ def sms_webhook(*, validate_signature=True):
                 return HttpResponse("Invalid JSON payload provided.", status=400)
             if not validate_signature or client.check_signature(data):
                 if data.get("concat") == "true":
-                    # Put it in the database.
-                    try:
-                        with transaction.atomic():
-                            incoming_sms = incoming_sms_parser.load(data)
-                            incoming_sms.to_model().save()
-                    except IntegrityError:
-                        return HttpResponse("Partial message already stored.")
-
-                    # Then query if we have all the parts
-                    matching_parts = SMSMessagePart.objects.filter(
-                        concat_ref=incoming_sms.concat_ref
-                    )
-                    count = matching_parts.count()
-                    expected = incoming_sms.concat_total
-                    if count == expected:
-                        # If we have all the parts then create a FrankenSMS from the pieces,
-                        # and call the wrapped view function:
-                        text = "".join(part.text for part in matching_parts)
-                        request.sms = IncomingSMS(
-                            msisdn=incoming_sms.msisdn,
-                            to=incoming_sms.to,
-                            message_id=incoming_sms.message_id,
-                            text=text,
-                            type=incoming_sms.type,
-                            keyword=incoming_sms.keyword,
-                            message_timestamp=incoming_sms.message_timestamp,
-                            timestamp=incoming_sms.timestamp,
-                            concat=False,
-                            concat_ref=incoming_sms.concat_ref,
-                        )
-                        return func(request, *args, **kwargs)
-                    else:
-                        return HttpResponse("Partial message received.")
+                    return _handle_message_part(request, data, func, args, kwargs)
                 else:
                     request.sms = incoming_sms_parser.load(data)
                     return func(request, *args, **kwargs)
@@ -169,4 +136,44 @@ def sms_webhook(*, validate_signature=True):
 
         return inner
 
-    return decorator
+    if func is not None:
+        return decorator(func)
+    else:
+        return decorator
+
+
+def _handle_message_part(request, data, wrapped_func, args, kwargs):
+    # Put it in the database.
+    try:
+        with transaction.atomic():
+            incoming_sms = incoming_sms_parser.load(data)
+            incoming_sms.to_model().save()
+    except IntegrityError:
+        return HttpResponse("Partial message already stored.")
+
+    # Then query if we have all the parts
+    matching_parts = SMSMessagePart.objects.filter(
+        concat_ref=incoming_sms.concat_ref
+    )
+    count = matching_parts.count()
+    expected = incoming_sms.concat_total
+    if count == expected:
+        # If we have all the parts then create a FrankenSMS from the pieces,
+        # and call the wrapped view function:
+        text = "".join(part.text for part in matching_parts)
+        request.sms = IncomingSMS(
+            msisdn=incoming_sms.msisdn,
+            to=incoming_sms.to,
+            message_id=incoming_sms.message_id,
+            text=text,
+            type=incoming_sms.type,
+            keyword=incoming_sms.keyword,
+            message_timestamp=incoming_sms.message_timestamp,
+            timestamp=incoming_sms.timestamp,
+            concat=False,
+            concat_ref=incoming_sms.concat_ref,
+        )
+        matching_parts.delete()
+        return wrapped_func(request, *args, **kwargs)
+    else:
+        return HttpResponse("Partial message received.")
