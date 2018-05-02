@@ -40,9 +40,6 @@ class OwnedNumber(models.Model):
     def __repr__(self):
         return f'<OwnedNumber {self.msisdn} ({self.country_code})>'
 
-    def formatted_msisdn(self):
-        return phonenumbers.format_number(phonenumbers.parse('+' + self.msisdn), phonenumbers.PhoneNumberFormat.INTERNATIONAL)
-
 
 class Registration(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='registrations')

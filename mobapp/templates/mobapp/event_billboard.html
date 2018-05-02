@@ -1,3 +1,4 @@
+{% load phonenumbers %}
 <!doctype html>
 <html>
     <head>
@@ -33,12 +34,12 @@
         <main role="main" class="container">
                 <h1>Hey {{ event.name }}!</h1>
                 <div>
-                    Send an SMS with your first name to one of these numbers to be entered into our competition!
+                    Send an SMS with your first name to one of these numbers to enter our competition!
                 </div>
                 
                 <ul>
                     {% for number in event.numbers.all %}
-                    <li>{{number.formatted_msisdn}}</li>
+                    <li>{{ number.msisdn | international }}</li>
                     <!-- <td>{{number.country_code}}</td> -->
                     {% endfor %}
                 </ul>

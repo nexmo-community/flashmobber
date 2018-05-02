@@ -86,8 +86,12 @@ class DeleteEvent(LoginRequiredMixin, DeleteView):
 
 class ListAvailableNumbers(LoginRequiredMixin, View):
     def get(self, request, country_code):
-        response = client.get_available_numbers(country_code, features='SMS')
-        print(response)
+        try:
+            response = client.get_available_numbers(country_code, features='SMS')
+            print(response)
+        except Exception as e:
+            print(e)
+            raise
         
         if response.get('numbers') is not None:
             return render(request, 'mobapp/numbers_available.html', dict(numbers=response['numbers'], country_code=country_code))
@@ -159,3 +163,19 @@ class EventBillboard(DetailView):
         context = super().get_context_data(**kwargs)
         context['pusher_app_key'] = getattr(settings, 'PUSHER_APP_KEY')
         return context
+    
+
+class SearchNumbers(LoginRequiredMixin, View):
+    def get(self, request):
+        country_code = request.GET.get('country_code')
+        numbers = None
+        if country_code:
+            response = client.get_available_numbers(country_code, features='SMS')
+            print(response)
+            if response.get('numbers') is None:
+                raise Exception('Invalid object returned by get_available_numbers')
+            numbers = response['numbers']
+
+        return render(
+            request, 'mobapp/number_search.html',
+            dict(numbers=numbers, country_code=country_code))        

@@ -15,5 +15,5 @@ urlpatterns = [
     path('numbers/<str:country_code>/list', views.ListAvailableNumbers.as_view(), name='numbers-list'),
     path('number/buy', views.BuyNumber.as_view(), name='number-buy'),
     path('numbers/owned', views.ListOwnedNumbers.as_view(), name='numbers-owned'),
-    path('quicky', views.quicky)
+    path('numbers/search', views.SearchNumbers.as_view(), name='number-search'),
 ]

@@ -1,0 +1,40 @@
+{% extends 'mobapp/base.html' %}
+
+{% load phonenumbers %}
+
+{% block script %}
+<script>
+    $(function() {
+        $('.buy-button').click(function(evt) {
+            console.log("Clicky click");
+            const target = evt.delegateTarget;
+            $('#buyform>input[name=number]').val(target.dataset.number);
+            $('#buyform>input[name=country_code]').val(target.dataset.country);
+            $('#buyform').submit();
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <h1>Buy Numbers</h1>
+
+        {% if numbers %}
+            <ul>
+            {% for number in numbers %}
+                <li>{{ number.msisdn | international }} <button class="buy-button" data-number="{{ number.msisdn }}" data-country="{{ country_code }}" type="button">Buy</button></li>
+            {% endfor %}
+            </ul>
+        {% elif country_code is not None %}
+            There aren't any available numbers!
+        {% else %}
+            
+        {% endif %}
+    </div>
+    <form id="buyform" action="{% url 'number-buy' %}" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="number">
+        <input type="hidden" name="country_code">
+    </form>
+{% endblock %}
