@@ -1,0 +1,63 @@
+{% extends 'mobapp/base.html' %}
+
+{% block script %}
+<script>
+    $(function() {
+        $('.assign-button').click(function(evt) {
+            const target = evt.delegateTarget;
+            $('#assignform>input[name=number]').val(target.dataset.number);
+            $('#assignform').submit();
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <h1>Your Numbers</h1>
+        {% if numbers %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Number</th>
+                        <th scope="col">Country</th>
+                        <th scope="col">Event</th>
+                        {% if event %}
+                        <th scope="col">&nbsp;</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+            {% for number in numbers %}
+                    <tr>
+                        <td>{{number.msisdn}}</td>
+                        <td>{{number.country_code}}</td>
+                        <td>
+                            {% if not number.event %}
+                                <i>Unassigned</i>
+                            {% else %}
+                                Assigned to <a href="{% url 'event-detail' slug=number.event.slug %}">{{number.event.name}}</a>
+                            {% endif %}
+                        </td>
+                        {% if event %}
+                        <td>
+                            <button class="assign-button" data-number="{{ number.msisdn }}">
+                                Assign to {{ event.name }}
+                            </button>
+                        </td>
+                        {% endif %}
+                    </tr>
+            {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            You haven't bought any numbers yet!
+        {% endif %}
+    </div>
+    {% if event %}
+    <form id="assignform" action="{% url 'number-assign' slug=event.slug %}" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="number">
+    </form>
+    {% endif %}
+{% endblock %}

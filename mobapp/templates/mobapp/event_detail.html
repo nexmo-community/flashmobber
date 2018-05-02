@@ -1,0 +1,32 @@
+{% extends 'mobapp/base.html' %}
+
+{% block content %}
+
+<h1>{{ event.name }} ({{ event.year }})</h1>
+<div>
+    <a href="{% url 'event-edit' slug=event.slug %}">Edit</a>
+</div>
+<h2>Assigned Numbers</h2>
+{% if event.numbers.count > 0 %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Number</th>
+                <th scope="col">Country</th>
+            </tr>
+        </thead>
+        <tbody>
+    {% for number in event.numbers.all %}
+            <tr>
+                <td>{{number.msisdn}}</td>
+                <td>{{number.country_code}}</td>
+            </tr>
+    {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'number-assign-list' slug=event.slug %}">Assign More</a>
+{% else %}
+    No numbers are assigned to this event yet. You should go <a href="{% url 'number-assign-list' slug=event.slug %}">Assign Some</a>.
+{% endif %}
+
+{% endblock %}

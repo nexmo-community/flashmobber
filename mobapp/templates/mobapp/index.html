@@ -2,6 +2,19 @@
 
 {% block content %}
     <div>
-        <h1>Hiya!</h1>
+        <h1>Events</h1>
+        
+        {% if events %}
+            <div>
+                <a href="{% url 'event-create' %}">Create Event</a>
+            </div>
+            <ul>
+            {% for event in events %}
+                <li><a href="{% url 'event-detail' slug=event.slug %}">{{ event.name }}</a></li>
+            {% endfor %}
+            </ul>
+        {% else %}
+        There aren't any events! Why don't you <a href="{% url 'event-create' %}">Create One</a>?
+        {% endif %}
     </div>
 {% endblock %}

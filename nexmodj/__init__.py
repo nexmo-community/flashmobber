@@ -3,6 +3,8 @@ from django.conf import settings
 import nexmo
 
 
+default_app_config = 'nexmodj.apps.NexmodjConfig'
+
 client = nexmo.Client(
     api_key=getattr(settings, "NEXMO_API_KEY", None),
     api_secret=getattr(settings, "NEXMO_API_SECRET", None),
@@ -12,4 +14,3 @@ client = nexmo.Client(
     private_key=getattr(settings, "NEXMO_PRIVATE_KEY", None),
 )
 
-default_app_config = 'nexmodj.apps.NexmodjConfig'

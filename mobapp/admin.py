@@ -1,3 +1,7 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Event, OwnedNumber, Registration
+
+admin.site.register(Event)
+admin.site.register(OwnedNumber)
+admin.site.register(Registration)

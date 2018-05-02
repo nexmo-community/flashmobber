@@ -44,6 +44,14 @@ class IncomingSMS:
     concat_ref = attr.ib(type=str, default=None)
     concat_total = attr.ib(type=int, default=None)
 
+    def reply(self, text, type='text'):
+        client.send_message({
+            'to': self.msisdn,
+            'from': self.to,
+            'text': text,
+            'type': type,
+        })
+
     def to_model(self):
         data = {a.name: getattr(self, a.name) for a in attr.fields(self.__class__)}
         del data["concat"]
