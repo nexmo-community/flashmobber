@@ -16,13 +16,22 @@ pipenv shell
 To run it you'll need to set the following environment variables, either directly, or using Foreman or Envdir:
 
 ```
+# Nexmo credentials:
 declare -x NEXMO_API_KEY=your-nexmo-api-key
 declare -x NEXMO_API_SECRET=your-nexmo-api-secret
 declare -x NEXMO_SIGNATURE_SECRET=your-signature-secret (Contact Nexmo Support)
 declare -x NEXMO_SIGNATURE_METHOD=your-signature-encryption-method (Contact Nexmo Support)
+
+# Some Django config:
 declare -x SECRET_KEY=a-random-string
 declare -x DEBUG=true
 declare -x ALLOWED_HOSTS=comma-separated-domain-list
+
+# Pusher app credentials:
+declare -x PUSHER_APP_ID=id
+declare -x PUSHER_APP_KEY=key
+declare -x PUSHER_APP_SECRET=secret
+declare -x PUSHER_APP_CLUSTER=cluster-country-code
 ```
 
 You'll also need to configure Nexmo to send you SMS using JSON and POST!
@@ -43,4 +52,6 @@ python manage.py runserver
 * Add interface to send a message to registered participants
 * General appearance improvements
 * Style the event billboard page!
-* Need to enforce authentication
+
+## Ideas
+* Contact QR code on the billboard to make sending SMS easier!
