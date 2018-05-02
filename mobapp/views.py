@@ -1,6 +1,7 @@
 from django.shortcuts import render, HttpResponse, reverse
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import AccessMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.views.generic import DetailView, ListView
 from django.views.generic.base import TemplateView, View
@@ -60,30 +61,30 @@ class LoggedOut(TemplateView):
 class EventList(ListView):
     model = Event
     context_object_name = 'events'
-    template_name = 'mobapp/index.html'
+    template_name = 'mobapp/event_list.html'
 
 
-class EventDetail(DetailView):
+class EventDetail(LoginRequiredMixin, DetailView):
     model = Event
     context_object_name = 'event'
     template_name = 'mobapp/event_detail.html'
 
 
-class CreateEvent(CreateView):
+class CreateEvent(LoginRequiredMixin, CreateView):
     model = Event
     fields = ['name', 'year', 'slug']
 
 
-class UpdateEvent(UpdateView):
+class UpdateEvent(LoginRequiredMixin, UpdateView):
     model = Event
     fields = ['name', 'year', 'slug']
 
 
-class DeleteEvent(DeleteView):
+class DeleteEvent(LoginRequiredMixin, DeleteView):
     model = Event
 
 
-class ListAvailableNumbers(View, AccessMixin):
+class ListAvailableNumbers(LoginRequiredMixin, View):
     def get(self, request, country_code):
         response = client.get_available_numbers(country_code, features='SMS')
         print(response)
@@ -99,7 +100,7 @@ def quicky(request):
 
 
 
-class BuyNumber(View, AccessMixin):
+class BuyNumber(LoginRequiredMixin, View):
     def post(self, request):
         country_code = request.POST['country_code']
         msisdn = request.POST['number']
@@ -121,7 +122,7 @@ class BuyNumber(View, AccessMixin):
         return HttpResponseRedirect(reverse('numbers-owned'))
 
 
-class ListOwnedNumbers(View):
+class ListOwnedNumbers(LoginRequiredMixin, View):
     model = OwnedNumber
     context_object_name = 'numbers'
     template_name = "mobapp/numbers_owned.html"
@@ -136,7 +137,7 @@ class ListOwnedNumbers(View):
         return render(request, self.template_name, { 'numbers': numbers, 'event': event })
 
 
-class AssignNumber(View, SingleObjectMixin):
+class AssignNumber(LoginRequiredMixin, View, SingleObjectMixin):
     model = Event
     context_object_name = 'event'
 
@@ -153,3 +154,8 @@ class EventBillboard(DetailView):
     model = Event
     context_object_name = 'event'
     template_name = 'mobapp/event_billboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pusher_app_key'] = getattr(settings, 'PUSHER_APP_KEY')
+        return context

@@ -1,9 +1,3 @@
-
-
-
-
-
-
 <!doctype html>
 <html>
     <head>
@@ -18,23 +12,39 @@
         <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
         <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js" integrity="sha384-u/bQvRA/1bobcXlcEYpsEdFVK/vJs3+T+nXLsBYJthmdBuavHvAW6UsmqO2Gd/F9" crossorigin="anonymous"></script>
-        {% block script %}{% endblock %}
+        <script src="https://js.pusher.com/4.1/pusher.min.js"></script>
+        <script>
+
+            // Enable pusher logging - don't include this in production
+            Pusher.logToConsole = true;
+
+            var pusher = new Pusher('{{ pusher_app_key }}', {
+                cluster: 'eu',
+                encrypted: true
+            });
+
+            var channel = pusher.subscribe('event-{{event.slug}}');
+            channel.bind('registration-event', function(data) {
+                $('#registration-count').text(data.count);
+            });
+        </script>
     </head>
     <body>
-                <main role="main" class="container">
-
-                        <h1>Hey {{ event.name }}!</h1>
-                        <div>
-                            Send an SMS with your first name to one of these numbers to be entered into our competition!
-                        </div>
-                        
-                        <ul>
-                            {% for number in event.numbers.all %}
-                            <li>{{number.formatted_msisdn}}</li>
-                            <!-- <td>{{number.country_code}}</td> -->
-                            {% endfor %}
-                        </ul>
-                        
-                </main>
+        <main role="main" class="container">
+                <h1>Hey {{ event.name }}!</h1>
+                <div>
+                    Send an SMS with your first name to one of these numbers to be entered into our competition!
+                </div>
+                
+                <ul>
+                    {% for number in event.numbers.all %}
+                    <li>{{number.formatted_msisdn}}</li>
+                    <!-- <td>{{number.country_code}}</td> -->
+                    {% endfor %}
+                </ul>
+                <div>
+                    There are currently <span id="registration-count">{{ event.registrations.count }}</span> people registered!
+                </div>
+        </main>
     </body>
 </html>

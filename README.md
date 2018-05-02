@@ -25,6 +25,8 @@ declare -x DEBUG=true
 declare -x ALLOWED_HOSTS=comma-separated-domain-list
 ```
 
+You'll also need to configure Nexmo to send you SMS using JSON and POST!
+
 Then run:
 
 ```shell

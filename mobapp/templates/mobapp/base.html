@@ -35,6 +35,10 @@
                         <span class="navbar-text">
                             <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
                         </span>
+                        {% else %}
+                        <span class="navbar-text">
+                            <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                        </span>
                         {% endif %}
                     </div>
                 </nav>

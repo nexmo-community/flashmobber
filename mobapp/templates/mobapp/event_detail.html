@@ -4,7 +4,7 @@
 
 <h1>{{ event.name }} ({{ event.year }})</h1>
 <div>
-    <a href="{% url 'event-edit' slug=event.slug %}">Edit</a>
+    <a href="{% url 'event-edit' slug=event.slug %}">Edit details</a>
 </div>
 <h2>Assigned Numbers</h2>
 {% if event.numbers.count > 0 %}
@@ -24,9 +24,12 @@
     {% endfor %}
         </tbody>
     </table>
-    <a href="{% url 'number-assign-list' slug=event.slug %}">Assign More</a>
+    <a href="{% url 'number-assign-list' slug=event.slug %}">Assign more numbers</a>
 {% else %}
     No numbers are assigned to this event yet. You should go <a href="{% url 'number-assign-list' slug=event.slug %}">Assign Some</a>.
 {% endif %}
+    <div>
+        Show the <a href="{% url 'event-billboard' slug=event.slug %}">Billboard</a> for this event.
+    </div>
 
 {% endblock %}
