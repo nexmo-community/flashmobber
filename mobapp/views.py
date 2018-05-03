@@ -1,3 +1,5 @@
+from string import Template
+
 from django.shortcuts import render, HttpResponse, reverse
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -93,15 +95,12 @@ class ListAvailableNumbers(LoginRequiredMixin, View):
             print(e)
             raise
         
-        if response.get('numbers') is not None:
-            return render(request, 'mobapp/numbers_available.html', dict(numbers=response['numbers'], country_code=country_code))
-        else:
-            raise Exception('Invalid object returned by get_available_numbers')
-
-
-def quicky(request):
-    request.build_absolute_uri(reverse('registration-webhook'))
-
+        return render(request, 'mobapp/numbers_available.html', dict(numbers=response['numbers'], country_code=country_code))
+        # API returns an empty object if no numbers are available.
+        # if response.get('numbers') is not None:
+        #     return render(request, 'mobapp/numbers_available.html', dict(numbers=response['numbers'], country_code=country_code))
+        # else:
+        #     raise Exception('Invalid object returned by get_available_numbers')
 
 
 class BuyNumber(LoginRequiredMixin, View):
@@ -111,17 +110,17 @@ class BuyNumber(LoginRequiredMixin, View):
 
         print(f"Buying {msisdn} in {country_code}")
         # buy number
-        # response = client.buy_number(country=country_code, msisdn=msisdn)
-        # if response['error-code'] != "200":
-        #     raise Exception(f"There was an error ({response.get('error-code')}) buying the number: {response.get('error-code-label')}")
+        response = client.buy_number(country=country_code, msisdn=msisdn)
+        if response['error-code'] != "200":
+            raise Exception(f"There was an error ({response.get('error-code')}) buying the number: {response.get('error-code-label')}")
         OwnedNumber(msisdn=msisdn, country_code=country_code).save()
         # configure the number to point to our registration webhook
         webhook_uri = request.build_absolute_uri(reverse('registration-webhook'))
-        # client.update_number({
-        #    'country': country_code,
-        #    'msisdn': msisdn,
-        #    'moHttpUrl': webhook_uri,
-        # })
+        client.update_number({
+           'country': country_code,
+           'msisdn': msisdn,
+           'moHttpUrl': webhook_uri,
+        })
 
         return HttpResponseRedirect(reverse('numbers-owned'))
 
@@ -172,10 +171,40 @@ class SearchNumbers(LoginRequiredMixin, View):
         if country_code:
             response = client.get_available_numbers(country_code, features='SMS')
             print(response)
-            if response.get('numbers') is None:
-                raise Exception('Invalid object returned by get_available_numbers')
-            numbers = response['numbers']
+            # Search endpoint returns an empty object if no numbers are available
+            # if response.get('numbers') is None:
+            #     raise Exception('Invalid object returned by get_available_numbers')
+            numbers = response.get('numbers', [])
 
         return render(
             request, 'mobapp/number_search.html',
-            dict(numbers=numbers, country_code=country_code))        
+            dict(numbers=numbers, country_code=country_code))
+
+
+class BroadcastView(LoginRequiredMixin, View, SingleObjectMixin):
+    model = Event
+
+    def get(self, request, *args, **kwargs):
+        event = self.get_object()
+        return render(request, 'mobapp/event_broadcast.html', {
+            'event': event,
+        })
+    
+    def post(self, request, *args, **kwargs):
+        template = Template(request.POST['message'])
+        event = self.get_object()
+
+        from_ = event.numbers.all().first()
+        print(event.numbers.all())
+        for registration in event.registrations.all():
+            personalized = template.safe_substitute(name=registration.name)
+            print('from:', from_)
+            response = client.send_message({
+                'from': from_,
+                'to': registration.msisdn,
+                'text': personalized,
+                'type': 'unicode',
+            })
+            print(f"Sent {personalized} to {registration.msisdn}")
+            print(response)
+        return HttpResponseRedirect(reverse('event-detail', kwargs={'slug': event.slug}))

@@ -6,12 +6,12 @@
         
         {% if user.is_authenticated %}
             {% if events %}
-                <div>
-                    <a href="{% url 'event-create' %}">Create Event</a>
-                </div>
-                <ul>
+                <p>
+                    <a href="{% url 'event-create' %}" class="btn btn-primary">Create Event</a>
+                </p>
+                <ul class="list-group list-group-flush">
                 {% for event in events %}
-                    <li><a href="{% url 'event-detail' slug=event.slug %}">{{ event.name }}</a></li>
+                    <li class="list-group-item"><a href="{% url 'event-detail' slug=event.slug %}">{{ event.name }}</a></li>
                 {% endfor %}
                 </ul>
             {% else %}
@@ -22,5 +22,8 @@
                 <li><a href="{% url 'event-billboard' slug=event.slug %}">{{ event.name }}</a></li>
             {% endfor %}
         {% endif %}
+    </div>
+    <div>
+            <a href="{% url 'numbers-owned' %}" class="btn btn-primary">Manage your numbers</a>
     </div>
 {% endblock %}

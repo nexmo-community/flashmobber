@@ -15,6 +15,9 @@
 {% block content %}
     <div>
         <h1>Your Numbers</h1>
+        <p>
+            <a href="{% url 'number-search' %}" class="btn btn-primary">Buy a number</a>
+        </p>
         {% if numbers %}
             <table class="table">
                 <thead>
@@ -50,6 +53,11 @@
             {% endfor %}
                 </tbody>
             </table>
+            {% if not event %}
+            <div>
+                To assign numbers, <a href="{% url 'event-list' %}">select an event</a>
+            </div> 
+            {% endif %}
         {% else %}
             You haven't bought any numbers yet!
         {% endif %}

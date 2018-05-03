@@ -1,11 +1,12 @@
 {% extends 'mobapp/base.html' %}
-
+{% load phonenumbers %}
 {% block content %}
 
 <h1>{{ event.name }} ({{ event.year }})</h1>
-<div>
-    <a href="{% url 'event-edit' slug=event.slug %}">Edit details</a>
-</div>
+<p>
+    <a href="{% url 'event-edit' slug=event.slug %}" class="btn btn-primary">Edit details</a>
+    <a href="{% url 'broadcast' slug=event.slug %}" class="btn btn-warning">Broadcast a message!</a>
+</p>
 <h2>Assigned Numbers</h2>
 {% if event.numbers.count > 0 %}
     <table class="table">
@@ -18,18 +19,25 @@
         <tbody>
     {% for number in event.numbers.all %}
             <tr>
-                <td>{{number.msisdn}}</td>
+                <td>{{number.msisdn | international }}</td>
                 <td>{{number.country_code}}</td>
             </tr>
     {% endfor %}
         </tbody>
     </table>
-    <a href="{% url 'number-assign-list' slug=event.slug %}">Assign more numbers</a>
+    <a href="{% url 'number-assign-list' slug=event.slug %}" class="btn btn-primary">Assign more numbers</a>
 {% else %}
-    No numbers are assigned to this event yet. You should go <a href="{% url 'number-assign-list' slug=event.slug %}">Assign Some</a>.
-{% endif %}
+    <p>
+        No numbers are assigned to this event yet. You should go <a href="{% url 'number-assign-list' slug=event.slug %}">Assign Some</a>.
+    </p>
+    {% endif %}
+    <h2>Registrations</h2>
     <div>
-        Show the <a href="{% url 'event-billboard' slug=event.slug %}">Billboard</a> for this event.
+        There are currently {{ event.registrations.count }} participants registered for this event!
     </div>
+    <hr>
+    <p>
+        Show the <a href="{% url 'event-billboard' slug=event.slug %}">Billboard</a> for this event.
+    </p>
 
 {% endblock %}

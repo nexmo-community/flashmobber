@@ -29,23 +29,68 @@
                 $('#registration-count').text(data.count);
             });
         </script>
+        <style>
+        html,
+        body {
+            height: 100%;
+            background-color: #333;
+        }
+
+        body {
+            display: -ms-flexbox;
+            display: -webkit-box;
+            display: flex;
+            -ms-flex-pack: center;
+            -webkit-box-pack: center;
+            justify-content: center;
+            color: #fff;
+            text-shadow: 0 .05rem .1rem rgba(0, 0, 0, .5);
+            box-shadow: inset 0 0 5rem rgba(0, 0, 0, .5);
+        }
+
+        .cover-container {
+            max-width: 42em;
+        }
+
+        /*
+        * Cover
+        */
+        .cover {
+            padding: 0 1.5rem;
+        }
+
+        .cover .btn-lg {
+            padding: .75rem 1.25rem;
+            font-weight: 700;
+        }
+</style>
     </head>
     <body>
-        <main role="main" class="container">
-                <h1>Hey {{ event.name }}!</h1>
+        <!--<main role="main" class="container">
+                <h1></h1>
                 <div>
-                    Send an SMS with your first name to one of these numbers to enter our competition!
+                    
                 </div>
                 
-                <ul>
+                
+                
+        </main>-->
+
+        <main role="main" class="inner cover">
+            <h1 class="cover-heading">Hey {{ event.name }}!</h1>
+            <p class="lead">
+                Send an SMS with your first name to one of these numbers to enter our competition!
+            </p>
+            <p class="lead">
+                <ul class="list-group list-group-flush" style="margin: 0 auto; background: transparent">
                     {% for number in event.numbers.all %}
-                    <li>{{ number.msisdn | international }}</li>
-                    <!-- <td>{{number.country_code}}</td> -->
+                    <li class="list-group-item" style="background: transparent" >{{ number.msisdn | international }}</li>
                     {% endfor %}
                 </ul>
-                <div>
-                    There are currently <span id="registration-count">{{ event.registrations.count }}</span> people registered!
-                </div>
+            </p>
+            <p>
+                There are currently <span id="registration-count">{{ event.registrations.count }}</span> people registered!
+            </p>
         </main>
     </body>
 </html>

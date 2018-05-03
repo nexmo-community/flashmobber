@@ -1,0 +1,26 @@
+{% extends 'mobapp/base.html' %}
+{% load phonenumbers %}
+{% block content %}
+
+<h1>Send a Message to: {{ event.name }}
+    <br>
+    <span class="small">({{ event.registrations.count }} participants)</span></h1>
+
+<form action="{% url 'broadcast' slug=event.slug %}" method="POST">
+    {% csrf_token %}
+    <div>
+        <label for="message">Message:</label>
+    </div>
+    <div>
+    <textarea id="message" name="message">
+    </textarea>
+    </div>
+    <div>
+        You can use <code>$name</code> in your message to personalize it.
+    </div>
+    <div>
+        <button class="btn btn-warning">Send Message</button>
+    </div>
+</form>
+
+{% endblock %}

@@ -4,8 +4,20 @@
 
 <h1>Event Details</h1>
 <form action="" method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Save" />
+    <div class="form-group">
+        <label for="id_name">Name:</label>
+        <input type="text" name="name" maxlength="255" required id="id_name" class="form-control"/>
+    </div>
+    <div class="form-group">
+            <label for="id_year">Year:</label> <input type="number" name="year" value="2018" required id="id_year" class="form-control" />
+            <input type="hidden" name="initial-year" value="2018" id="initial-id_year" />
+    </div>
+    <div class="form-group">
+            <label for="id_slug">Slug:</label>
+            <input type="text" name="slug" maxlength="50" required id="id_slug"  class="form-control"/>
+    </div>
+
+    <input type="submit" value="Save" class="btn btn-primary"/>
 </form>
 
 {% endblock %}

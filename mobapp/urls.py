@@ -12,6 +12,7 @@ urlpatterns = [
     path('events/<slug:slug>/billboard', views.EventBillboard.as_view(), name='event-billboard'),
     path('events/<slug:slug>/assign-number', views.AssignNumber.as_view(), name='number-assign'),
     path('events/<slug:slug>/list-numbers', views.ListOwnedNumbers.as_view(), name='number-assign-list'),
+    path('events/<slug:slug>/broadcast', views.BroadcastView.as_view(), name='broadcast'),
     path('numbers/<str:country_code>/list', views.ListAvailableNumbers.as_view(), name='numbers-list'),
     path('number/buy', views.BuyNumber.as_view(), name='number-buy'),
     path('numbers/owned', views.ListOwnedNumbers.as_view(), name='numbers-owned'),
