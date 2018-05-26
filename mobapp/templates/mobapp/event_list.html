@@ -9,21 +9,28 @@
                 <p>
                     <a href="{% url 'event-create' %}" class="btn btn-primary">Create Event</a>
                 </p>
+                <p>
                 <ul class="list-group list-group-flush">
                 {% for event in events %}
                     <li class="list-group-item"><a href="{% url 'event-detail' slug=event.slug %}">{{ event.name }}</a></li>
                 {% endfor %}
                 </ul>
+                </p>
             {% else %}
+            <p>
                 There aren't any events! Why don't you <a href="{% url 'event-create' %}">Create One</a>?
+            </p>
             {% endif %}
+            <p>
+                <a href="{% url 'numbers-owned' %}" class="btn btn-primary">Manage your numbers</a>
+            </p>
         {% else %}
             {% for event in events %}
                 <li><a href="{% url 'event-billboard' slug=event.slug %}">{{ event.name }}</a></li>
             {% endfor %}
         {% endif %}
+
+        
     </div>
-    <div>
-            <a href="{% url 'numbers-owned' %}" class="btn btn-primary">Manage your numbers</a>
-    </div>
+    
 {% endblock %}
