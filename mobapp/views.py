@@ -206,3 +206,7 @@ class BroadcastView(LoginRequiredMixin, View, SingleObjectMixin):
             print(f"Sent {personalized} to {registration.msisdn}")
             print(response)
         return HttpResponseRedirect(reverse('event-detail', kwargs={'slug': event.slug}))
+
+
+class TempView(TemplateView):
+    template_name = 'mobapp/temp.html'
