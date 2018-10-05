@@ -1,17 +1,15 @@
 [packages]
-django = "~=2.0"
+django = "~=2.0.8"
 nexmo = "~=2.0.0"
 attrs = "==17.4.0"
 marshmallow = "==3.0.0b8"
 phonenumbers = "~=8.9.4"
 pusher = "*"
-dj-nexmo = {git = "https://github.com/judy2k/dj-nexmo.git"}
 
 [dev-packages]
 black = "*"
 pytest-django = "~=3.2.1"
 pytest = "~=3.5.1"
-invoke = "*"
 
 [pipenv]
 allow_prereleases = true
