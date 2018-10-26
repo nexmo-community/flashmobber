@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import SMSMessagePart
 
+
 @admin.register(SMSMessagePart)
 class SMSMessagePartAdmin(admin.ModelAdmin):
     list_display = ('msisdn', 'to', '__str__',)

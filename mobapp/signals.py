@@ -15,6 +15,7 @@ pusher_client = pusher.Pusher(
   ssl=True
 )
 
+
 @receiver(post_save, sender=Registration)
 def my_handler(sender, instance, **kwargs):
     print("Sending count!")

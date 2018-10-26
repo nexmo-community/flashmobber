@@ -5,6 +5,7 @@ import phonenumbers
 
 register = template.Library()
 
+
 @register.filter(name='international')
 @stringfilter
 def international(value):
