@@ -1,5 +1,5 @@
 [packages]
-django = "~=2.0.8"
+django = "~=2.0.12"
 nexmo = "~=2.0.0"
 attrs = "==17.4.0"
 marshmallow = "==3.0.0b8"
