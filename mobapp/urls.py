@@ -17,4 +17,5 @@ urlpatterns = [
     path('number/buy', views.BuyNumber.as_view(), name='number-buy'),
     path('numbers/owned', views.ListOwnedNumbers.as_view(), name='numbers-owned'),
     path('numbers/search', views.SearchNumbers.as_view(), name='number-search'),
+    path('temp', views.TempView.as_view(), name='temp-view')
 ]

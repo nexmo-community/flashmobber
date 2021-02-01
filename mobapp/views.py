@@ -2,7 +2,6 @@ from string import Template
 
 from django.shortcuts import render, HttpResponse, reverse
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.views.generic import DetailView, ListView
@@ -10,11 +9,10 @@ from django.views.generic.base import TemplateView, View
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
-from nexmodj.decorators import sms_webhook
+from djnexmo import client
+from djnexmo.decorators import sms_webhook
 
 from .models import Event, OwnedNumber, Registration
-
-from nexmodj import client
 
 
 @sms_webhook
@@ -208,3 +206,7 @@ class BroadcastView(LoginRequiredMixin, View, SingleObjectMixin):
             print(f"Sent {personalized} to {registration.msisdn}")
             print(response)
         return HttpResponseRedirect(reverse('event-detail', kwargs={'slug': event.slug}))
+
+
+class TempView(TemplateView):
+    template_name = 'mobapp/temp.html'
