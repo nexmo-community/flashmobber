@@ -13,12 +13,14 @@ pipenv shell
 
 ## Running It:
 
-To run it you'll need to set the following environment variables, either directly, or using Foreman or Envdir:
+To run it you'll need to set the following environment variables. This can be done either by editing the values in the `config.env` file and sourcing it using `source config.env` or using Foreman or Envdir.
 
 ```
 # Nexmo credentials:
 declare -x NEXMO_API_KEY=your-nexmo-api-key
 declare -x NEXMO_API_SECRET=your-nexmo-api-secret
+declare -x NEXMO_PRIVATE_KEY=your-nexmo-private-key
+declare -x NEXMO_APPLICATION_ID=your-nexmo-application-id
 declare -x NEXMO_SIGNATURE_SECRET=your-signature-secret (Contact Nexmo Support)
 declare -x NEXMO_SIGNATURE_METHOD=your-signature-encryption-method (Contact Nexmo Support)
 
@@ -54,4 +56,5 @@ python manage.py runserver
 * Style the event billboard page!
 
 ## Ideas
+
 * Contact QR code on the billboard to make sending SMS easier!
