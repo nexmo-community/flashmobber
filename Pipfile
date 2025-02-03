@@ -2,7 +2,7 @@
 django = "~=2.0.8"
 nexmo = "~=2.0.0"
 attrs = "==17.4.0"
-marshmallow = "==3.0.0b8"
+marshmallow = "==3.0.0"
 phonenumbers = "~=8.9.4"
 pusher = "*"
 
